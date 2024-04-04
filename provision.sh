@@ -1,5 +1,7 @@
 #!/bin/bash
-MYSQL_PASSWORD="Devops@sysadmin"
+MYSQL_PASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | head -c 20)
+USER="devops"
+
 # Cria o usuário sysadmin
 sudo useradd -m -d /home/sysadmin -s /bin/bash sysadmin
 
@@ -55,8 +57,8 @@ sudo systemctl enable mariadb
 # Cria o banco de dados e o usuário no MySQL
 sudo mysql -u root <<EOF
 CREATE DATABASE IF NOT EXISTS livechatdb;
-CREATE USER IF NOT EXISTS 'user'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';
-GRANT ALL PRIVILEGES ON livechatdb.* TO 'user'@'%' IDENTIFIED BY '$MYSQL_PASSWORD' WITH GRANT OPTION;
+CREATE USER IF NOT EXISTS '$USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD';
+GRANT ALL PRIVILEGES ON livechatdb.* TO '$USER'@'%' IDENTIFIED BY '$MYSQL_PASSWORD' WITH GRANT OPTION;
 FLUSH PRIVILEGES;
 EOF
 
@@ -146,13 +148,19 @@ EOF
 IP=$(hostname -I | awk '{print $2}')
 
 echo "Acesse o endereço http://$IP:80"
+echo "USUÀRIO DB: $USER"
+echo "SENHA DB: $MYSQL_PASSWORD"
 
 # Reinicia o serviço HTTPD
 sudo systemctl restart httpd
 
 # Configura o firewall
+echo "Habilitando o serviço do firewalld"
 sudo systemctl start firewalld.service
+echo "Garantindo regra para acesso HTTP"
 sudo firewall-cmd --permanent --zone=public --add-service=http
+echo "Garantindo regra para acesso HTTPS"
 sudo firewall-cmd --permanent --zone=public --add-service=https
+echo "Garantindo regra para MySQL 3306/tcp"
 sudo firewall-cmd --permanent --add-port=3306/tcp
 sudo firewall-cmd --reload
