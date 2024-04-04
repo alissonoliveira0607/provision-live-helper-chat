@@ -49,8 +49,9 @@ docker network create devops
 ```
 Isso garantirá que os serviços 'web' e 'database' possam se comunicar entre si.
 
-## Comandos Úteis
-
+## Uso
+1. Clone este repositório em sua máquina local.
+2. Navegue até o diretório onde o arquivo docker-compose.yaml está localizado.
 - `docker-compose up -d`: Inicia os serviços definidos no arquivo `docker-compose.yml` em segundo plano.
 - `docker-compose down -v`: Para e remove os contêineres definidos no arquivo `docker-compose.yml`.
 
